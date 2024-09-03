@@ -4,24 +4,41 @@ package org.example
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main() {
 
-    fun checkAnagram(str1: String, str2: String): Boolean {
-        val charMapOfStr1 = mutableMapOf<Char, Int>()   // to store occurrences of each char in str1
+    fun checkSubstringAnagram(text: String, pattern: String): Boolean {
 
-        // Generate frequency map of str1
-        for (char in str1) {
-            charMapOfStr1[char] = charMapOfStr1.getOrDefault(char, 0) + 1
+        // Initialise both arrays from 0..25 (ASCII a-z)
+        val patternCharFrequency = IntArray(26)
+        val windowCharFrequency = IntArray(26)
+
+        // Calculating character frequency in pattern
+        for (char in pattern) {
+            patternCharFrequency[char - 'a']++
         }
 
-        // Decrement frequency based on str2
-        for (i in str2.indices) {
-            if (charMapOfStr1.containsKey(str2[i])) {
-                charMapOfStr1[str2[i]] = charMapOfStr1[str2[i]]!! - 1
+        // Calculating character frequency in text
+        for (i in pattern.indices) {
+            windowCharFrequency[text[i] - 'a']++
+        }
+
+        // If initial pattern matches then
+        if (patternCharFrequency.contentEquals(windowCharFrequency)) {
+            return true
+        }
+
+        // else use sliding window approach to match substring of text with pattern
+        for (i in 0 until (text.length - pattern.length)) {
+            windowCharFrequency[text[i] - 'a']--    // decrement leftmost char frequency
+            windowCharFrequency[text[i + pattern.length] - 'a']++   // increment rightmost char frequency
+
+            if (patternCharFrequency.contentEquals(windowCharFrequency)) {
+                return true // If frequencies match, then substring is anagram
             }
         }
 
-        return charMapOfStr1.all { it.value == 0 }
+        return false    // If initial frequency match and sliding window approach result in no anagram then return false
     }
 
-    val result = checkAnagram("evil", "vile")
-    println("Provided strings are anagram: $result")
+    val result = checkSubstringAnagram("cbaebabacd", "abc")
+    println("Provided pattern is an anagram: $result")
+
 }
